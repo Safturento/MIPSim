@@ -1,24 +1,34 @@
 import re
 from register import Register
 from instructions import Instructions
+from gui import Gui
+import string
 
+# Create objects for different components of the simulator
 registers = Register()
 instructions = Instructions(registers)
+gui = Gui(registers)
+
+# This allows for a mapping that automatically removes all whitespace
+# characters from a string using string.translate(whitespace_trans)
+whitespace_trans = {ord(c):None for c in string.whitespace}
 
 # Split each line of the file into two pieces:
 #  the instruction name and the parameters to pass to any function
 def parse_line(line_num, line):
-	result = re.match(r'(\w+) (.+)', line)
+	result = re.match(r'(\w+)[ \t]+(.+)', line)
 	inst_name = result[1]
-	params = result[2]
-
-	# Ensure that instruction exists and then execute it
-	# if inst_name in instructions:
+	params = result[2].translate(whitespace_trans)
 	instructions[inst_name](params)
 
+# Loop through file one line at a time each time user presses enter
 with open('test.asm') as file:
 	for line_num, line in enumerate(file):
-		if len(line.strip()) > 0:
+		line = line.strip()
+		if len(line) > 0:
+			print(">>",line,input(), end='')
 			parse_line(line_num, line)
+			gui.update()
 
-print(registers)
+print("\nend of file. press enter to close")
+input()

@@ -12,12 +12,11 @@ class Instructions:
 		self.register = register
 
 	def addi(self, params):
-		results = re.match(self.PATTERNS['r_type_immediate'], params.replace(' ', ''))
-
+		results = re.match(self.PATTERNS['r_type_immediate'], params)
 		self.register[results[1]] = self.register[results[2]] + int(results[3])
 
 	def add(self, params):
-		results = re.match(self.PATTERNS['r_type'], params.replace(' ', ''))
+		results = re.match(self.PATTERNS['r_type'], params)
 		self.register[results[1]] = self.register[results[2]] + self.register[results[3]]
 
 	# Overloads self[key] to allow easy access to MIPS functions

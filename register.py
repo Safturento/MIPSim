@@ -35,17 +35,20 @@ REGISTER_NICKS = {
 }
 
 class Register:
-	registers = {}
-
 	def __init__(self):
 		# Initialize Registers with special registers
-		self.registers['hi'] = 0
-		self.registers['lo'] = 0
-		self.registers['pc'] = 0
+		self.registers = {
+			'hi': 0,
+			'lo': 0,
+			'pc': 0
+		}
 
 		# Load numbered registers
 		for r in range(32):
 			self.registers['$' + str(r)] = 0
+
+		self.ordered_keys = list(self.registers.keys())
+		self.num_registers = len(self.registers)
 
 	# overload indexing functions to give easy access to registers
 	# ex: reg['$0'] instead of reg.registers['$0']
@@ -58,7 +61,20 @@ class Register:
 	def __setitem__(self, key, value):
 		if key in REGISTER_NICKS:
 			self.registers[REGISTER_NICKS[key]] = value
-		self.registers[key] = value
+		else:
+			self.registers[key] = value
 
 	def __str__(self):
 		return '\n'.join(['{}\t: {:032b}'.format(reg,val) for reg,val in self.registers.items()])
+
+	def __iter__(self):
+		self.n = 0
+		return self
+
+	def __next__(self):
+		if self.n < self.num_registers:
+			key = self.ordered_keys[self.n]
+			self.n += 1
+			return (key, self.registers[key])
+		else:
+			raise StopIteration
