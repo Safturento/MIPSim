@@ -1,8 +1,11 @@
 import re
+import string
+import sys
+import os
+
 from register import Register
 from instructions import Instructions
 from gui import Gui
-import string
 
 # Create objects for different components of the simulator
 registers = Register()
@@ -22,7 +25,15 @@ def parse_line(line_num, line):
 	instructions[inst_name](params)
 
 # Loop through file one line at a time each time user presses enter
-with open('test.asm') as file:
+file_path = 'test.asm'
+if len(sys.argv) > 1:
+	if os.path.isfile(sys.argv[1]):
+		file_path = sys.argv[1]
+	else:
+		print(sys.argv[1], 'file not found.')
+		sys.exit()
+
+with open(file_path) as file:
 	for line_num, line in enumerate(file):
 		line = line.strip()
 		if len(line) > 0:
