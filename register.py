@@ -35,8 +35,9 @@ REGISTER_NICKS = {
 }
 
 class Register:
-	def __init__(self):
+	def __init__(self, jumps):
 		# Initialize Registers with special registers
+		self.jumps = jumps
 		self.registers = {
 			'hi': 0,
 			'lo': 0,

@@ -7,11 +7,6 @@ from register import Register
 from instructions import Instructions
 from gui import Gui
 
-# Create objects for different components of the simulator
-registers = Register()
-instructions = Instructions(registers)
-gui = Gui(registers)
-
 # This allows for a mapping that automatically removes all whitespace
 # characters from a string using string.translate(whitespace_trans)
 whitespace_trans = {ord(c):None for c in string.whitespace}
@@ -33,13 +28,33 @@ if len(sys.argv) > 1:
 		print(sys.argv[1], 'file not found.')
 		sys.exit()
 
+
+lines = []
 with open(file_path) as file:
-	for line_num, line in enumerate(file):
-		line = line.strip()
-		if len(line) > 0:
-			print(">>",line,input(), end='')
-			parse_line(line_num, line)
-			gui.update()
+	lines = list(file)
+
+# Populate jumps
+jumps = {}
+for i,line in enumerate(lines):
+	jump_line = re.match(r'^(\w+):(.+)?', line.strip())
+	if jump_line:
+		jumps[jump_line[1]] = i
+		lines[i] = '' if jump_line[2] == None else jump_line[2]
+
+# Create objects for different components of the simulator
+registers = Register(jumps)
+instructions = Instructions(registers)
+gui = Gui(registers)
+
+end = len(lines)
+while registers['pc'] < end:
+	line = lines[registers['pc']].strip()
+	if line and len(line) > 0:
+		parse_line(registers['pc'], line)
+		print(">>",line,input(), end='')
+		gui.update()
+	registers['pc'] += 1
+print(registers)
 
 print("\nend of file. press enter to close")
 input()
