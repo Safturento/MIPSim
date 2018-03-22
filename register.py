@@ -43,6 +43,8 @@ class Register:
 			'lo': 0,
 			'pc': 0
 		}
+		self.register_nicks = {v:k for k,v in REGISTER_NICKS.items()}
+		print(self.register_nicks)
 
 		# Load numbered registers
 		for r in range(32):
@@ -79,3 +81,8 @@ class Register:
 			return (key, self.registers[key])
 		else:
 			raise StopIteration
+
+	def get_nick(self, reg_num):
+		if reg_num in self.register_nicks:
+			return self.register_nicks[reg_num]
+		return reg_num

@@ -55,10 +55,10 @@ end = len(lines)
 while registers['pc'] < end:
 	line = lines[registers['pc']].strip()
 	if line and len(line) > 0:
-		print(">>",line) #,input, end='')
+		print(">>", line, input(), end='')
 		parse_line(registers['pc'], line)
 		gui.update()
 	registers['pc'] += 1
 
 print("\nend of file. press enter to close")
-# input()
+input()
