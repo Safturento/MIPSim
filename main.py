@@ -5,6 +5,7 @@ import os
 
 from register import Register
 from instructions import Instructions
+from memory import Memory
 from gui import Gui
 
 # This allows for a mapping that automatically removes all whitespace
@@ -14,7 +15,7 @@ whitespace_trans = {ord(c):None for c in string.whitespace}
 # Split each line of the file into two pieces:
 #  the instruction name and the parameters to pass to any function
 def parse_line(line_num, line):
-	result = re.match(r'(\w+)[ \t]+(.+)', line)
+	result = re.match(r'(\w+)(.*)', line)
 	inst_name = result[1]
 	params = result[2].translate(whitespace_trans)
 	instructions[inst_name](params)
@@ -28,7 +29,6 @@ if len(sys.argv) > 1:
 		print(sys.argv[1], 'file not found.')
 		sys.exit()
 
-
 lines = []
 with open(file_path) as file:
 	lines = list(file)
@@ -36,6 +36,10 @@ with open(file_path) as file:
 # Populate jumps
 jumps = {}
 for i,line in enumerate(lines):
+	# Remove all comments while were pre-parsing
+	lines[i] = line.split('#', 1)[0]
+
+	# Check if line has a jump target
 	jump_line = re.match(r'^(\w+):(.+)?', line.strip())
 	if jump_line:
 		jumps[jump_line[1]] = i
@@ -43,18 +47,18 @@ for i,line in enumerate(lines):
 
 # Create objects for different components of the simulator
 registers = Register(jumps)
-instructions = Instructions(registers)
+memory = Memory()
+instructions = Instructions(registers, memory)
 gui = Gui(registers)
 
 end = len(lines)
 while registers['pc'] < end:
 	line = lines[registers['pc']].strip()
 	if line and len(line) > 0:
+		print(">>",line) #,input, end='')
 		parse_line(registers['pc'], line)
-		print(">>",line,input(), end='')
 		gui.update()
 	registers['pc'] += 1
-print(registers)
 
 print("\nend of file. press enter to close")
-input()
+# input()
