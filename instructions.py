@@ -88,11 +88,11 @@ class Instructions:
 			#  ensuring the line with the target gets run
 			self.register['pc'] = self.register.jumps[params] - 1
 
-	def JAL(self, params):
+	def jal(self, params):
 		self.register['$ra'] = self.register['pc']
 		self.j(params)
 
-	def JR(self, params):
+	def jr(self, params):
 		results = self.get_params('[reg]')
 		self.register['pc'] = self.register['$ra']
 

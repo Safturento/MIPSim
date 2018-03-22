@@ -15,7 +15,6 @@ class Gui(threading.Thread):
 
 		threading.Thread.__init__(self)
 		self.start()
-		
 
 	def init_register_labels(self):		
 		self.register_labels = {}
