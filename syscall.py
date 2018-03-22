@@ -4,6 +4,9 @@ def print_int(register):
 def print_float(register):
 	pass
 
+def print_double(register):
+	pass
+
 def print_string(register):
 	pass
 
@@ -15,7 +18,6 @@ def read_float(register):
 
 def read_string(register):
 	pass
-
 
 service_map = {
 	1: print_int,
