@@ -10,3 +10,13 @@ asdf: addi $v0, $v0, 1 # should run
 			move $a0, $v0
 			syscall
 fdas:
+
+#basic for loop
+	li $a0, 0
+	li $t0, 5
+	li $v0, 1
+
+start:
+	addi $a0, $a0, 1
+	syscall
+	bne $a0, $t0, start

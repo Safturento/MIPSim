@@ -8,7 +8,6 @@ class Instructions:
 			.replace('[reg]', '(\\$[a-z0-9]+)') \
 			.replace('[imm]', '([0-9]+)') \
 			.replace('[off]', '(\\w+)')
-		print(regex)
 
 		return re.match(regex, params)
 
@@ -51,7 +50,7 @@ class Instructions:
 		
 	def bne(self, params):
 		results = self.get_params('[reg],[reg],[off]', params)
-		if self.register[results[1]] == self.register[results[2]]:
+		if self.register[results[1]] != self.register[results[2]]:
 			self.j(results[3])
 
 	def bgez(self, params):
@@ -90,12 +89,12 @@ class Instructions:
 			self.register['pc'] = self.register.jumps[params] - 1
 
 	def JAL(self, params):
-		pass
+		self.register['$ra'] = self.register['pc']
+		self.j(params)
 
 	def JR(self, params):
-		pass
-
-
+		results = self.get_params('[reg]')
+		self.register['pc'] = self.register['$ra']
 
 	# Overloads self[key] to allow easy access to MIPS functions
 	def __getitem__(self, key):
