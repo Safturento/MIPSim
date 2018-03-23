@@ -2,8 +2,28 @@ import re
 from syscall import service_map
 
 class Instructions:
-	# Regular expression patterns to extract parameters
+	def __init__(self, register, memory):
+		self.register = register
+		self.memory = memory
+ 
 	def get_params(self, query, params):
+		"""
+		Extracts parameters from line using tag-style string matching
+		Args:
+			query (str): String containing the items in the pattern to match. supported tags include:
+				[reg] - matching a register name
+				[imm] - matching an integer value
+				[off] - matching a jump target for offset
+			params (str): String containing parameters from assembly file to match with regex
+
+		Example:
+			params = '$v0,$v0,1'
+			results = self.get_params('[reg],[reg],[imm]'], params)
+			
+		Returns:
+		 	Regular expression groups containing individual values matching given tags
+		"""
+
 		regex = query \
 			.replace('[reg]', '(\\$[a-z0-9]+)') \
 			.replace('[imm]', '([0-9]+)') \
@@ -11,10 +31,8 @@ class Instructions:
 
 		return re.match(regex, params)
 
-	def __init__(self, register, memory):
-		self.register = register
-		self.memory = memory
 
+	# Arithmetic instructions
 	def addi(self, params):
 		results = self.get_params('[reg],[reg],[imm]', params)
 		self.register[results[1]] = self.register[results[2]] + int(results[3])
@@ -30,10 +48,13 @@ class Instructions:
 		self.register['lo'] = bin(product)[34:]
 		self.register['hi'] = bin(product)[2:34]
 
+
+	# Load instructions
 	def li(self, params):
 		results = self.get_params('[reg],[imm]', params)
 		self.register[results[1]] = int(results[2])
 
+	# Misc instructions
 	def move(self, params):
 		results = self.get_params('[reg],[reg]', params)
 		self.register[results[1]] = self.register[results[2]]

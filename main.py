@@ -12,16 +12,23 @@ from gui import Gui
 # characters from a string using string.translate(whitespace_trans)
 whitespace_trans = {ord(c):None for c in string.whitespace}
 
-# Split each line of the file into two pieces:
-#  the instruction name and the parameters to pass to any function
-def parse_line(line_num, line):
+def parse_line(line):
+	"""
+		Split each line of the file into two pieces:
+			1. the instruction name 
+			2. the parameters to pass to any function
+
+		params:
+			line (str): the assembly code line to parse and execute
+	"""
 	result = re.match(r'(\w+)(.*)', line)
 	inst_name = result[1]
 	params = result[2].translate(whitespace_trans)
 	instructions[inst_name](params)
 
-# Loop through file one line at a time each time user presses enter
+# Default file if none is given
 file_path = 'test.asm'
+# Loop through file one line at a time each time user presses enter
 if len(sys.argv) > 1:
 	if os.path.isfile(sys.argv[1]):
 		file_path = sys.argv[1]
@@ -29,11 +36,12 @@ if len(sys.argv) > 1:
 		print(sys.argv[1], 'file not found.')
 		sys.exit()
 
+# Load file into a list of individual lines
 lines = []
 with open(file_path) as file:
 	lines = list(file)
 
-# Populate jumps
+# Populate jump targets for easier access when needed
 jumps = {}
 for i,line in enumerate(lines):
 	# Remove all comments while were pre-parsing
@@ -43,6 +51,7 @@ for i,line in enumerate(lines):
 	jump_line = re.match(r'^(\w+):(.+)?', line.strip())
 	if jump_line:
 		jumps[jump_line[1]] = i
+
 		lines[i] = '' if jump_line[2] == None else jump_line[2]
 
 # Create objects for different components of the simulator
@@ -51,13 +60,19 @@ memory = Memory()
 instructions = Instructions(registers, memory)
 gui = Gui(registers)
 
+# Get marker for end of file to know when to quit
 end = len(lines)
+
+# Start program counter loop to run through program
 while registers['pc'] < end:
+
 	line = lines[registers['pc']].strip()
+	
 	if line and len(line) > 0:
 		print(">>", line, input(), end='')
-		parse_line(registers['pc'], line)
+		parse_line(line)
 		gui.update()
+
 	registers['pc'] += 1
 
 print("\nend of file. press enter to close")

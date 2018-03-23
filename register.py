@@ -36,15 +36,14 @@ REGISTER_NICKS = {
 
 class Register:
 	def __init__(self, jumps):
-		# Initialize Registers with special registers
 		self.jumps = jumps
+		# Initialize Registers with special registers
 		self.registers = {
 			'hi': 0,
 			'lo': 0,
 			'pc': 0
 		}
 		self.register_nicks = {v:k for k,v in REGISTER_NICKS.items()}
-		print(self.register_nicks)
 
 		# Load numbered registers
 		for r in range(32):
