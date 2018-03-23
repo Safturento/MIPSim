@@ -1,5 +1,4 @@
 import re
-import string
 import sys
 import os
 
@@ -7,10 +6,6 @@ from register import Register
 from instructions import Instructions
 from memory import Memory
 from gui import Gui
-
-# This allows for a mapping that automatically removes all whitespace
-# characters from a string using string.translate(whitespace_trans)
-whitespace_trans = {ord(c):None for c in string.whitespace}
 
 def parse_line(line):
 	"""
@@ -21,10 +16,9 @@ def parse_line(line):
 		params:
 			line (str): the assembly code line to parse and execute
 	"""
-	result = re.match(r'(\w+)(.*)', line)
+	result = re.match(r'\.?(\w+)(.*)', line)
 	inst_name = result[1]
-	params = result[2].translate(whitespace_trans)
-	instructions[inst_name](params)
+	instructions[inst_name](result[2])
 
 # Default file if none is given
 file_path = 'test.asm'
@@ -69,11 +63,11 @@ while registers['pc'] < end:
 	line = lines[registers['pc']].strip()
 	
 	if line and len(line) > 0:
-		print(">>", line, input(), end='')
+		print(">>", line)#, input(), end='')
 		parse_line(line)
 		gui.update()
 
 	registers['pc'] += 1
 
 print("\nend of file. press enter to close")
-input()
+# input()

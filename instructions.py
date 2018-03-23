@@ -1,10 +1,15 @@
 import re
 from syscall import service_map
+import string
 
 class Instructions:
 	def __init__(self, register, memory):
 		self.register = register
 		self.memory = memory
+
+		# This allows for a mapping that automatically removes all whitespace
+		# characters from a string using string.translate(whitespace_trans)
+		self.whitespace = {ord(c):None for c in string.whitespace}
  
 	def get_params(self, query, params):
 		"""
@@ -29,7 +34,7 @@ class Instructions:
 			.replace('[imm]', '([0-9]+)') \
 			.replace('[off]', '(\\w+)')
 
-		return re.match(regex, params)
+		return re.match(regex, params.translate(self.whitespace))
 
 
 	# Arithmetic instructions
@@ -116,6 +121,13 @@ class Instructions:
 	def jr(self, params):
 		results = self.get_params('[reg]')
 		self.register['pc'] = self.register['$ra']
+
+	# Assembler Directives
+	def asciiz(self, params):
+		print(params)
+
+	def data(self, param):
+		pass
 
 	# Overloads self[key] to allow easy access to MIPS functions
 	def __getitem__(self, key):

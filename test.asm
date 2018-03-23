@@ -1,3 +1,6 @@
+.data
+	.asciiz "test string"
+	
 			beq $a0, $a1, fdas
 			j asdf
 			add  $v1, $v1, $v0 # should be skipped
