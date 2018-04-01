@@ -39,65 +39,65 @@ class Instructions:
 
 
 	# Arithmetic instructions
-	def _addi(self, params, return_hex=False):
+	def _addi(self, dest, source, imm, return_hex=False):
 		# if return_hex:
 			# return int('0x000000' + \
 			# self.registers.encode(params[0]) + \
 			# self.registers.encode(params[0]) + \
 			# int(params[1],16) + \
 
-		self.register[params[0]] = self.register[params[1]] + int(params[2])
+		self.register[dest] = self.register[source] + int(imm)
 
-	def _add(self, params, return_hex=False):
+	def _add(self, dest, source, target, return_hex=False):
 		if return_hex:
 			return ''
 
-		self.register[params[0]] = self.register[params[1]] + self.register[params[2]]
+		self.register[dest] = self.register[source] + self.register[target]
 
-	def _sub(self, params, return_hex=False):
+	def _sub(self, dest, source, target, return_hex=False):
 		if return_hex:
 			return ''
 
-		self.register[params[0]] = self.register[params[1]] - self.register[params[2]]
+		self.register[dest] = self.register[source] - self.register[target]
 
 
-	def _mult(self, params, return_hex=False):
+	def _mult(self, source, target, return_hex=False):
 		if return_hex:
 			return ''
 
-		product = params[0] * params[1]
+		product = '{:064b}'.format((source * target))
 
-		self.register['lo'] = bin(product)[34:]
-		self.register['hi'] = bin(product)[2:34]
+		self.register['lo'] = bin(product)[32:]
+		self.register['hi'] = bin(product)[:32]
 
 	# Shift instructions
-	def _sll(self, params, return_hex=False):
+	def _sll(self, dest, target, shift, return_hex=False):
 		if return_hex:
 			return ''
 
-		self.register[params[0]] = self.register[params[1]] << params[2]
+		self.register[dest] = self.register[source] << shift
 
-	def _srl(self, params, return_hex=False):
+	def _srl(self, dest, target, shift, return_hex=False):
 		if return_hex:
 			return ''
 
-		self.register[params[0]] = self.register[params[1]] >> params[2]
+		self.register[dest] = self.register[source] >> shift
 
 	# Load instructions
-	def _li(self, params, return_hex=False):
+	def _li(self, dest, imm, return_hex=False):
 		if return_hex:
 			return ''
 
-		self.register[params[0]] = int(params[1])
+		self.register[dest] = int(imm)
 
 	# Misc instructions
-	def _move(self, params, return_hex=False):
+	def _move(self, dest, source, return_hex=False):
 		if return_hex:
 			return ''
 
-		self.register[params[0]] = self.register[params[1]]
+		self.register[dest] = self.register[source]
 
-	def _syscall(self, params, return_hex=False):
+	def _syscall(self, return_hex=False):
 		service_number = int(self.register['$v0'])
 		if return_hex:
 			return ''
@@ -105,109 +105,109 @@ class Instructions:
 		service_map[service_number](self.register)
 
 	# Logical operators
-	def _and(self, params, return_hex=False):
-		self.registers[params[0]] = self.registers[params[1]] & self.registers[params[2]]
+	def _and(self, dest, source, target, return_hex=False):
+		self.registers[dest] = self.registers[source] & self.registers[target]
 		if return_hex:
 			return ''
 
 
-	def _or(self, params, return_hex=False):
-		self.registers[params[0]] = self.registers[params[1]] | self.registers[params[2]]
+	def _or(self, dest, source, target, return_hex=False):
+		self.registers[dest] = self.registers[source] | self.registers[target]
 		if return_hex:
 			return ''
 
 
-	def _xor(self, params, return_hex=False):
-		self.registers[params[0]] = self.registers[params[1]] ^ self.registers[params[2]]
+	def _xor(self, dest, source, target, return_hex=False):
+		self.registers[dest] = self.registers[source] ^ self.registers[target]
 		if return_hex:
 			return ''
 
 
-	def _nor(self, params, return_hex=False):
-		self.registers[params[0]] = ~ (self.registers[params[1]] | self.registers[params[2]])
+	def _nor(self, dest, source, target, return_hex=False):
+		self.registers[dest] = ~ (self.registers[source] | self.registers[target])
 		if return_hex:
 			return ''
 
 
 	# Branches
-	def _beq(self, params, return_hex=False):
+	def _beq(self, source, target, offset, return_hex=False):
 		if return_hex:
 			return ''
 
-		if self.register[params[0]] == self.register[params[1]]:
-			self.register['pc'] = params[2]
+		if self.register[source] == self.register[target]:
+			self.register['pc'] = offset
 		
-	def _bne(self, params, return_hex=False):
+	def _bne(self, source, target, offset, return_hex=False):
 		if return_hex:
 			return ''
 
-		if self.register[params[0]] != self.register[params[1]]:
-			self.register['pc'] = params[2]
+		if self.register[source] != self.register[target]:
+			self.register['pc'] = offset
 
-	def _bgez(self, params, return_hex=False):
+	def _bgez(self, source, offset, return_hex=False):
 		if return_hex:
 			return ''
 
-		if self.register[params[0]] >= 0:
-			self.register['pc'] = params[1]
+		if self.register[source] >= 0:
+			self.register['pc'] = offset
 		
-	def _bgtz(self, params, return_hex=False):
+	def _bgtz(self, source, offset, return_hex=False):
 		if return_hex:
 			return ''
 
-		if self.register[params[0]] > 0:
-			self.register['pc'] = params[1]
+		if self.register[source] > 0:
+			self.register['pc'] = offset
 		
-	def _blez(self, params, return_hex=False):
+	def _blez(self, source, offset, return_hex=False):
 		if return_hex:
 			return ''
 
-		if self.register[params[0]] <= 0:
-			self.register['pc'] = params[1]
+		if self.register[source] <= 0:
+			self.register['pc'] = offset
 		
-	def _bltz(self, params, return_hex=False):
+	def _bltz(self, source, offset, return_hex=False):
 		if return_hex:
 			return ''
 
-		if self.register[params[0]] < 0:
-			self.register['pc'] = params[1]
+		if self.register[source] < 0:
+			self.register['pc'] = offset
 		
-	def _bgezal(self, params, return_hex=False):
+	def _bgezal(self, source, offset, return_hex=False):
 		if return_hex:
 			return ''
 
 		self.register['$ra'] = self.register['pc']
 
-		self.bgez(params)
+		self.bgez(source, offset)
 
-	def _bltzal(self, params, return_hex=False):
+	def _bltzal(self, source, offset, return_hex=False):
 		if return_hex:
 			return ''
 
 		self.register['$ra'] = self.register['pc']
 
-		self.blez(params)
+		self.blez(source, offset)
 
 	# Jump
-	def _j(self, params, return_hex=False):
+	def _j(self, target, return_hex=False):
 		if return_hex:
 			return ''
-		self.register['pc'] = params[0]
+		self.register['pc'] = target
 
 
-	def _jal(self, params, return_hex=False):
+	def _jal(self, target, return_hex=False):
 		if return_hex:
 			return ''
 
 		self.register['$ra'] = self.register['pc']
 
-		self._j(params)
+		self._j(target)
 
-	def _jr(self, params, return_hex=False):
+	def _jr(self, source, return_hex=False):
 		if return_hex:
 			return ''
 
-		self.register['pc'] = self.register['$ra']
+		self.register['pc'] = self.register[source]
 
 
 	def _ascii(self, string):

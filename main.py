@@ -88,9 +88,12 @@ end = register['pc'] + (len(line_components)-1)*4
 while register['pc'] <= end:
 
 	line = memory[register['pc']]
-	# print(register['pc'], ">>", line['inst'], line['params'])
-	instructions[line['inst']](line['params'])
-	gui.update()
+	print(register['pc'], ">>", line['inst'], line['params'])
+	if line['params']:
+		instructions[line['inst']](*line['params'])
+	else:
+		instructions[line['inst']]()
+	# gui.update()
 
 	register['pc'] += 4
 

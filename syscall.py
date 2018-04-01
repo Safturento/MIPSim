@@ -1,7 +1,8 @@
 import sys
 
 def print_int(register):
-	print(int(register['$a0']))
+	print(register['$a0'])
+	# print(int(register['$a0']))
 
 def print_float(register):
 	pass
