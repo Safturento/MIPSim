@@ -35,13 +35,12 @@ REGISTER_NICKS = {
 }
 
 class Register:
-	def __init__(self, jumps):
-		self.jumps = jumps
+	def __init__(self):
 		# Initialize Registers with special registers
 		self.registers = {
 			'hi': 0,
 			'lo': 0,
-			'pc': 0
+			'pc': 0x00400000
 		}
 		self.register_nicks = {v:k for k,v in REGISTER_NICKS.items()}
 
@@ -49,8 +48,12 @@ class Register:
 		for r in range(32):
 			self.registers['$' + str(r)] = 0
 
+		self['$sp'] = int('7fffeffc', 16)
+		self['$gp'] = int('10008000', 16)
 		self.ordered_keys = list(self.registers.keys())
 		self.num_registers = len(self.registers)
+
+
 
 	# overload indexing functions to give easy access to registers
 	# ex: reg['$0'] instead of reg.registers['$0']
@@ -59,6 +62,10 @@ class Register:
 			return self.registers[REGISTER_NICKS[key]]
 		return self.registers[key]
 
+	def encode(self, key):
+		if key in REGISTER_NICKS:
+			return int(REGISTER_NICKS[key][1:],16)
+		return int(key[1:],16)
 
 	def __setitem__(self, key, value):
 		if key in REGISTER_NICKS:

@@ -1,3 +1,5 @@
+import sys
+
 def print_int(register):
 	print(int(register['$a0']))
 
@@ -19,7 +21,12 @@ def read_float(register):
 def read_string(register):
 	pass
 
+def exit(register):
+	print('exiting.')
+	sys.exit()
+
 service_map = {
 	1: print_int,
-	2: print_float
+	2: print_float,
+	10: exit
 }

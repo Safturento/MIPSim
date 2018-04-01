@@ -1,24 +1,18 @@
 import re
 import sys
 import os
+import string
 
 from register import Register
 from instructions import Instructions
 from memory import Memory
 from gui import Gui
 
-def parse_line(line):
-	"""
-		Split each line of the file into two pieces:
-			1. the instruction name 
-			2. the parameters to pass to any function
-
-		params:
-			line (str): the assembly code line to parse and execute
-	"""
-	result = re.match(r'\.?(\w+)(.*)', line)
-	inst_name = result[1]
-	instructions[inst_name](result[2])
+# Create objects for different components of the simulator
+register = Register()
+memory = Memory()
+instructions = Instructions(register, memory)
+gui = Gui(register)
 
 # Default file if none is given
 file_path = 'test.asm'
@@ -32,42 +26,73 @@ if len(sys.argv) > 1:
 
 # Load file into a list of individual lines
 lines = []
+line_components = []
 with open(file_path) as file:
 	lines = list(file)
 
 # Populate jump targets for easier access when needed
 jumps = {}
-for i,line in enumerate(lines):
-	# Remove all comments while were pre-parsing
-	lines[i] = line.split('#', 1)[0]
+line_num = 0
+for line in lines:
+	# Remove all comments and extra whitespaces
+	line = line.split('#', 1)[0]
+	line = line.translate({ord(c):' ' for c in string.whitespace})
+	line = re.sub(' +', ' ', line)
 
-	# Check if line has a jump target
-	jump_line = re.match(r'^(\w+):(.+)?', line.strip())
-	if jump_line:
-		jumps[jump_line[1]] = i
+	# If the line is empty we don't need to parse it for code
+	if len(line.strip()) > 0:
 
-		lines[i] = '' if jump_line[2] == None else jump_line[2]
+		# Separate line into target, instruction, and paramaters
+		jump_target, instruction, params = re.match(r'^(\w+:)?\s?(\w+)?\s?(.+)?', line.strip()).groups()
 
-# Create objects for different components of the simulator
-registers = Register(jumps)
-memory = Memory()
-instructions = Instructions(registers, memory)
-gui = Gui(registers)
+		if jump_target:
+			jumps[jump_target[:-1:]] = line_num
+
+		if instruction:
+			if params:
+				# Remove any remaining whitespace between parameters
+				params = params.translate({ord(c):None for c in string.whitespace})
+				params = params.split(',')
+			# Rejoin line without targets
+			# line_components.append([instruction, params])
+			line_components.append({
+				'inst': instruction,
+				'params': params, 
+				'line': line,
+				# 'code': [instruction](params, True)
+			})
+			line_num += 1
+
+# This second pass swaps jump targets for memory locations
+# and load instructions into memory
+for i,line in enumerate(line_components):
+	# swap target for memory location if it's a jump or branch
+	if line['inst'] in instructions.jump_instructions:
+		if line['params'][-1] in jumps:
+			# replace target string with memory location
+			line_components[i]['params'][-1] = register['pc'] + (jumps[line['params'][-1]]-1) * 4
+		else:
+			print("Invalid jump target", line['params'])
+			sys.exit()
+
+	# populate memory. It's important to remember that any value stored or accessed in memory
+	# has a multiple of 4 in order to be consistent with actual memory simulation 
+	memory[register['pc'] + i*4] = line
+
+# print(memory.dump(register['pc'], len(line_components)-1))
 
 # Get marker for end of file to know when to quit
-end = len(lines)
+end = register['pc'] + (len(line_components)-1)*4
 
 # Start program counter loop to run through program
-while registers['pc'] < end:
+while register['pc'] <= end:
 
-	line = lines[registers['pc']].strip()
-	
-	if line and len(line) > 0:
-		print(">>", line)#, input(), end='')
-		parse_line(line)
-		gui.update()
+	line = memory[register['pc']]
+	# print(register['pc'], ">>", line['inst'], line['params'])
+	instructions[line['inst']](line['params'])
+	gui.update()
 
-	registers['pc'] += 1
+	register['pc'] += 4
 
 print("\nend of file. press enter to close")
 # input()
