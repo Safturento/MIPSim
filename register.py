@@ -74,7 +74,7 @@ class Register:
 			self.registers[key] = value
 
 	def __str__(self):
-		return '\n'.join(['{}\t: {:032b}'.format(reg,val) for reg,val in self.registers.items()])
+		return '\n'.join(['{}\t: {:08x}'.format(reg,val) for reg,val in self.registers.items()])
 
 	def __iter__(self):
 		self.n = 0

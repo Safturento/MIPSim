@@ -1,8 +1,8 @@
-		.data
-exit:	.asciiz "exiting"
-		.text
-		.globl main
-main:	
+.data
+	.asciiz "test string"
+.text
+.globl main
+main:
 		beq $a0, $a1, fdas
 		j asdf
 		add  $v1, $v1, $v0 # should be skipped
@@ -25,7 +25,6 @@ start:
 		addi $a0, $a0, 1
 		syscall
 		bne $a0, $t0, start
-
-exit:
+		
 		li $v0, 10 # Terminate program run and
 		syscall    # Exit

@@ -12,30 +12,8 @@ class Instructions:
 		# characters from a string using string.translate(whitespace_trans)
 		self.whitespace = {ord(c):None for c in string.whitespace}
  
-	def get_params(self, query, params):
-		"""
-		Extracts parameters from line using tag-style string matching
-		Args:
-			query (str): String containing the items in the pattern to match. supported tags include:
-				[reg] - matching a register name
-				[imm] - matching an integer value
-				[off] - matching a jump target for offset
-			params (str): String containing parameters from assembly file to match with regex
-
-		Example:
-			params = '$v0,$v0,1'
-
-			
-		Returns:
-		 	Regular expression groups containing individual values matching given tags
-		"""
-
-		regex = query \
-			.replace('[reg]', '(\\$[a-z0-9]+)') \
-			.replace('[imm]', '([0-9]+)') \
-			.replace('[off]', '(\\w+)')
-
-		return re.match(regex, params.translate(self.whitespace))
+	def set_gui(self, gui):
+		self.gui = gui
 
 
 	# Arithmetic instructions
@@ -98,11 +76,17 @@ class Instructions:
 		self.register[dest] = self.register[source]
 
 	def _syscall(self, return_hex=False):
-		service_number = int(self.register['$v0'])
 		if return_hex:
 			return ''
 
-		service_map[service_number](self.register)
+		service_number = int(self.register['$v0'])
+
+		output = service_map[service_number](self.register)
+		if output:
+			if self.gui:
+				self.gui.print(output)
+			else:
+				print(output)
 
 	# Logical operators
 	def _and(self, dest, source, target, return_hex=False):
