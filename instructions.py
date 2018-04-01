@@ -66,6 +66,10 @@ class Instructions:
 		if return_hex:
 			return ''
 
+		# self.register[dest] = int(imm)
+		if type(imm) is str:
+			imm = imm.replace('\\n', '\n')
+			imm = ord(imm)
 		self.register[dest] = int(imm)
 
 	# Misc instructions
@@ -82,7 +86,7 @@ class Instructions:
 		service_number = int(self.register['$v0'])
 
 		output = service_map[service_number](self.register)
-		if output:
+		if output != None:
 			if self.gui:
 				self.gui.print(output)
 			else:
@@ -203,7 +207,16 @@ class Instructions:
 		self.register['$sp']
 		self._ascii(string + "\0")
 
-	def _data(self, param):
+	def _globl(self, target, return_hex=False):
+		pass
+
+	def _data(self):
+		pass
+
+	def _text(self):
+		pass
+
+	def _nop(self):
 		pass
 
 	# Overloads self[key] to allow easy access to MIPS functions

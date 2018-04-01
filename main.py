@@ -28,8 +28,13 @@ if len(sys.argv) > 1:
 # Load file into a list of individual lines
 lines = []
 line_components = []
-with open(file_path) as file:
-	lines = list(file)
+lines = list(open(file_path))
+
+def to_int(input):
+	try:
+		return int(input)
+	except ValueError:
+		return input.strip('"\'').strip('\'"')
 
 # Populate jump targets for easier access when needed
 jumps = {}
@@ -44,7 +49,7 @@ for line in lines:
 	if len(line.strip()) > 0:
 
 		# Separate line into target, instruction, and paramaters
-		jump_target, instruction, params = re.match(r'^(\w+:)?\s?(\w+)?\s?(.+)?', line.strip()).groups()
+		jump_target, instruction, params = re.match(r'^(\w+:)?\s?\.?(\w+)?\s?(.+)?', line.strip()).groups()
 
 		if jump_target:
 			jumps[jump_target[:-1:]] = line_num
@@ -54,6 +59,8 @@ for line in lines:
 				# Remove any remaining whitespace between parameters
 				params = params.translate({ord(c):None for c in string.whitespace})
 				params = params.split(',')
+				params = list(map(to_int, params))
+				print(params)
 			# Rejoin line without targets
 			# line_components.append([instruction, params])
 			line_components.append({
@@ -78,7 +85,7 @@ for i,line in enumerate(line_components):
 	# This line is pretty mess but is able to parse jump locations into
 	# hex for display without overwriting the actual jump value in memory
 	# while simply passing everything else as its normal value
-	line['line'] = line['inst'] + ' ' + ','.join(['{:08x}'.format(x) if type(x) is int else x for x in (line['params'] or [])])
+	line['line'] = line['inst'] + ' ' + ', '.join(['{:08x}'.format(x) if type(x) is int else x for x in (line['params'] or [])])
 
 	# populate memory. It's important to remember that any value stored or accessed in memory
 	# has a multiple of 4 in order to be consistent with actual memory simulation 
@@ -108,7 +115,7 @@ if CONSOLE_OUTPUT:
 	input()
 else:
 	gui = Gui(register, memory)
-	
+
 	# Used for piping syscall output to gui console
 	instructions.set_gui(gui)
 

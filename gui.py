@@ -15,8 +15,6 @@ class Gui():
 
 		self.win = Frame(self.root)
 
-		Style().configure("Treeview", background='#383838', foreground = '#dddddd')
-
 		self.init_register_section()
 		self.init_text_segment()
 		self.init_output_window()

@@ -1,13 +1,13 @@
 .data
-	.asciiz "test string"
+		.asciiz "test string"
 .text
-.globl main
-main:
+		li $v0, 'a'
 		beq $a0, $a1, fdas
 		j asdf
 		add  $v1, $v1, $v0 # should be skipped
 asdf: 	addi $v0, $v0, 1 # should run
-			
+		
+		
 		add  $v1, $v1, $v0 # should be skipped
 
 # This comment should not show up on output
@@ -17,14 +17,24 @@ asdf: 	addi $v0, $v0, 1 # should run
 fdas:
 
 #basic for loop
-		li $a0, 0
-		li $t0, 5
+		li $t0, 0
+		li $t1, 5
+loopstart:
 		li $v0, 1
-
-start:
-		addi $a0, $a0, 1
+		move $a0, $t0
 		syscall
-		bne $a0, $t0, start
+
+		addi $t0, $t0, 1
+
+		li $v0, 11
+		li $a0, '\n'
+		syscall
 		
+		bne $t0, $t1, loopstart
+		
+		nop
+		nop
+		nop
+
 		li $v0, 10 # Terminate program run and
 		syscall    # Exit
