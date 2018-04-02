@@ -11,7 +11,11 @@ class Instructions:
 		# This allows for a mapping that automatically removes all whitespace
 		# characters from a string using string.translate(whitespace_trans)
 		self.whitespace = {ord(c):None for c in string.whitespace}
- 
+		self.escaped = {
+			'\\n': '\n'
+			# '\\"': '\'',
+			# "\\'": '\"',
+		}
 	def set_gui(self, gui):
 		self.gui = gui
 
@@ -68,7 +72,18 @@ class Instructions:
 
 		# self.register[dest] = int(imm)
 		if type(imm) is str:
+			# I haven't found a better way to do this,
+			# re-escaping keys is a weird problem..
+			imm = imm.replace('\\"', '\'')
+			imm = imm.replace("\\'", '\"')
+			imm = imm.replace('\\a', '\a')
+			imm = imm.replace('\\b', '\b')
+			imm = imm.replace('\\f', '\f')
 			imm = imm.replace('\\n', '\n')
+			imm = imm.replace('\\r', '\r')
+			imm = imm.replace('\\t', '\t')
+			imm = imm.replace('\\v', '\v')
+
 			imm = ord(imm)
 		self.register[dest] = int(imm)
 
