@@ -102,10 +102,10 @@ class Instructions:
 
 		output = service_map[service_number](self.register)
 		if output != None:
-			if self.gui:
+			if hasattr(self, 'gui'):
 				self.gui.print(output)
 			else:
-				print(output)
+				print('\n', output)
 
 	# Logical operators
 	def _and(self, dest, source, target, return_hex=False):
@@ -188,7 +188,6 @@ class Instructions:
 			return ''
 
 		self.register['$ra'] = self.register['pc']
-
 		self.blez(source, offset)
 
 	# Jump
@@ -213,8 +212,22 @@ class Instructions:
 		self.register['pc'] = self.register[source]
 
 
+	def _sw(self, source, target):
+		word_offset, reg = re.match(r'(\d+)\((\$\w+)\)', target).groups()
+		# Offset is word offset, so we need to multiply by 4 to get actual mem address
+		loc = self.register[reg] + int(word_offset)
+		self.memory[loc] = self.register[source]
+
+
+	def _lw(self, dest, target):
+		word_offset, reg = re.match(r'(\d+)\((\$\w+)\)', target).groups()
+		# Offset is word offset, so we need to multiply by 4 to get actual mem address
+		loc = self.register[reg] + int(word_offset)
+		self.register[dest] = self.memory[loc]
+
 	def _ascii(self, string):
-		print(string)
+		# print(string)
+		pass
 
 	# Assembler Directives
 	def _asciiz(self, string):

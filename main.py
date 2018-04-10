@@ -27,8 +27,14 @@ if len(sys.argv) > 1:
 
 # Load file into a list of individual lines
 lines = []
-line_components = []
+text_lines = []
+data_lines = []
+current_section = 'text'
 lines = list(open(file_path))
+
+# text_loc = 0x00400000
+# data_loc = 0x10010001
+# loc = text_loc
 
 def to_int(input):
 	try:
@@ -36,48 +42,57 @@ def to_int(input):
 	except ValueError:
 		return input.strip('"\'').strip('\'"')
 
+def sanitize(input):
+	input = input.split('#', 1)[0]
+	input = input.translate({ord(c):' ' for c in string.whitespace})
+	input = re.sub(' +', ' ', input)
+	input.strip()
+
+	return input 
+
 # Populate jump targets for easier access when needed
 jumps = {}
-line_num = 0
 for line in lines:
+
 	# Remove all comments and extra whitespaces
-	line = line.split('#', 1)[0]
-	line = line.translate({ord(c):' ' for c in string.whitespace})
-	line = re.sub(' +', ' ', line)
+	line = sanitize(line)
 
 	# If the line is empty we don't need to parse it for code
-	if len(line.strip()) > 0:
+	if len(line) > 0:
 
 		# Separate line into target, instruction, and paramaters
-		jump_target, instruction, params = re.match(r'^(\w+:)?\s?\.?(\w+)?\s?(.+)?', line.strip()).groups()
-
+		jump_target, instruction, params = re.match(r'^(\w+:)?\s?(\.?\w+)?\s?(.+)?', line).groups()
 		if jump_target:
-			jumps[jump_target[:-1:]] = line_num
+			jumps[jump_target[:-1:]] = len(text_lines)
 
 		if instruction:
-			if params:
-				# Remove any remaining whitespace between parameters
-				params = params.translate({ord(c):None for c in string.whitespace})
-				params = params.split(',')
-				params = list(map(to_int, params))
-				print(params)
-			# Rejoin line without targets
-			# line_components.append([instruction, params])
-			line_components.append({
-				'inst': instruction,
-				'params': params,
-			})
-			line_num += 1
+			if instruction == '.data':
+				current_section = 'data'
+			elif instruction == '.text':
+				current_section = 'data'
+			else: 
+				instruction = instruction.replace('.', '')
+				if params:
+					# Remove any remaining whitespace between parameters
+					params = params.translate({ord(c):None for c in string.whitespace})
+					params = params.split(',')
+					params = list(map(to_int, params))
+				# Rejoin line without targets
+				# text_lines.append([instruction, params])
+				text_lines.append({
+					'inst': instruction,
+					'params': params,
+				})
 
 # This second pass swaps jump targets for memory locations
 # and load instructions into memory
-for i,line in enumerate(line_components):
+for i,line in enumerate(text_lines):
 
 	# swap target for memory location if it's a jump or branch
 	if line['inst'] in instructions.jump_instructions:
 		if line['params'][-1] in jumps:
 			# replace target string with  memory location
-			line_components[i]['params'][-1] = register['pc'] + (jumps[line['params'][-1]]-1) * 4
+			text_lines[i]['params'][-1] = register['pc'] + (jumps[line['params'][-1]]-1) * 4
 		else:
 			print("Invalid jump target", line['params'])
 			sys.exit()
@@ -92,10 +107,10 @@ for i,line in enumerate(line_components):
 
 	memory[register['pc'] + i*4] = line
 
-# print(memory.dump(register['pc'], len(line_components)-1))
+# print(memory.dump(register['pc'], len(text_lines)-1))
 
 # Get marker for end of file to know when to quit
-end = register['pc'] + (len(line_components)-1)*4
+end = register['pc'] + (len(text_lines)-1)*4
 memory.set_text_section(end)
 
 

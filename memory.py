@@ -8,6 +8,9 @@ class Memory:
 	def __setitem__(self, key, value):
 		self.memory[key] = value
 
+	def __contains__(self, key):
+		return key in self.memory
+
 	def set_text_section(self, *args):
 		# If only one argument is given, assume its the end
 		if len(args) == 1:

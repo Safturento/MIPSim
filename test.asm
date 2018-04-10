@@ -1,8 +1,8 @@
-.data
-		.asciiz "test string"
-.text
-		li $v0, 'a'
-		beq $a0, $a1, fdas
+j swtest
+
+# random tests
+		li $v0, 1
+		beq $a0, $a1, asdf
 		j asdf
 		add  $v1, $v1, $v0 # should be skipped
 asdf: 	addi $v0, $v0, 1 # should run
@@ -14,8 +14,8 @@ asdf: 	addi $v0, $v0, 1 # should run
 		li $v0, 1 # test comment
 		move $a0, $v0
 		syscall
-fdas:
 
+looptest:
 #basic for loop
 		li $t0, 0
 		li $t1, 5
@@ -30,11 +30,16 @@ loopstart:
 		li $a0, '\n'
 		syscall
 		
-		bne $t0, $t1, loopstart
-		
-		nop
-		nop
-		nop
+		bne $t0, $t1, loopstart	
+	j exit
+
+swtest:
+		li $t0, 10
+		sw $t0, 0($sp)
+		lw $t1, 0($sp)
+	j exit
+
+exit:
 
 		li $v0, 10 # Terminate program run and
 		syscall    # Exit
