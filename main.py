@@ -9,6 +9,7 @@ from memory import Memory
 from gui import Gui
 
 CONSOLE_OUTPUT = False
+STEP = False
 
 # Create objects for different components of the simulator
 register = Register()
@@ -19,10 +20,16 @@ instructions = Instructions(register, memory)
 file_path = 'test.asm'
 # Loop through file one line at a time each time user presses enter
 if len(sys.argv) > 1:
-	if os.path.isfile(sys.argv[1]):
-		file_path = sys.argv[1]
+	if '-c' in sys.argv:
+		CONSOLE_OUTPUT = True
+	
+	if '-s' in sys.argv:
+		STEP = True
+
+	if os.path.isfile(sys.argv[-1]):
+		file_path = sys.argv[-1]
 	else:
-		print(sys.argv[1], 'file not found.')
+		print(sys.argv[-1], 'file not found.')
 		sys.exit()
 
 # Load file into a list of individual lines
@@ -71,36 +78,46 @@ for line in lines:
 			elif instruction == '.text':
 				current_section = 'data'
 			else: 
-				instruction = instruction.replace('.', '')
+				instruction = instruction.replace('.', '').lower()
 				if params:
 					# Remove any remaining whitespace between parameters
 					params = params.translate({ord(c):None for c in string.whitespace})
 					params = params.split(',')
 					params = list(map(to_int, params))
+				else:
+					params = []
 				# Rejoin line without targets
 				# text_lines.append([instruction, params])
 				text_lines.append({
 					'inst': instruction,
-					'params': params,
+					'params': params
 				})
 
 # This second pass swaps jump targets for memory locations
 # and load instructions into memory
 for i,line in enumerate(text_lines):
 
-	# swap target for memory location if it's a jump or branch
+	# swap target for memory location if it's a jump
 	if line['inst'] in instructions.jump_instructions:
 		if line['params'][-1] in jumps:
 			# replace target string with  memory location
-			text_lines[i]['params'][-1] = register['pc'] + (jumps[line['params'][-1]]-1) * 4
+			text_lines[i]['params'][-1] = register['pc'] + jumps[line['params'][-1]] * 4
 		else:
 			print("Invalid jump target", line['params'])
 			sys.exit()
+
+	# swap target for offset if it's a branch
+	if line['inst'] in instructions.branch_instructions:
+		if line['params'][-1] in jumps:
+			target_loc = jumps[line['params'][-1]]
+			# Calculate 2's complement to display proper 2's complement of negative values
+			text_lines[i]['params'][-1] = hex((target_loc - i - 1) & 2**32-1)
 
 	# This line is pretty mess but is able to parse jump locations into
 	# hex for display without overwriting the actual jump value in memory
 	# while simply passing everything else as its normal value
 	line['line'] = line['inst'] + ' ' + ', '.join(['{:08x}'.format(x) if type(x) is int else x for x in (line['params'] or [])])
+	text_lines[i]['code'] = instructions[line['inst']](return_hex=True, *line['params'])
 
 	# populate memory. It's important to remember that any value stored or accessed in memory
 	# has a multiple of 4 in order to be consistent with actual memory simulation 
@@ -144,5 +161,5 @@ else:
 			register['pc'] += 4
 			gui.update()
 
-	gui.set_loop(loop)
+	gui.set_loop(loop, STEP)
 	gui.root.mainloop()

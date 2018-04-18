@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter.ttk import *
+import tkinter.font as tkFont
 from threading import Thread
 import threading
 
@@ -8,10 +9,14 @@ from register import REGISTER_NICKS
 class Gui():
 	def __init__(self, registers, memory):
 		self.root = Tk()
-		self.root.geometry("660x850")
+		self.root.geometry("660x864")
 		self.registers = registers
 		self.memory = memory
 		self.root.title("Registers")
+
+		default_font = tkFont.nametofont("TkDefaultFont")
+		default_font.configure(family="Courier New", size=10)
+		self.root.option_add('*Font', default_font)
 
 		self.win = Frame(self.root)
 
@@ -22,8 +27,12 @@ class Gui():
 
 		self.win.pack(fill="both", expand=True)
 
-	def set_loop(self, loop_func):
+	def set_loop(self, loop_func, step):
+		# if step:
 		self.root.bind('<Return>', loop_func)
+		# else:
+		# 	while True:
+		# 		loop_func(self)
 
 	def init_register_section(self):		
 		# self.register_section = {}
@@ -41,7 +50,7 @@ class Gui():
 		for reg_num, reg_val in self.registers:
 			tv.insert('', 'end', reg_num, values=(self.registers.get_nick(reg_num), '{:08x}'.format(reg_val)))
 
-		tv.pack(side="left", fill="y", expand=True)
+		tv.pack(side="left", fill="y")
 		self.register_display = tv
 
 	def init_text_segment(self):
@@ -52,18 +61,21 @@ class Gui():
 		tv['show'] = 'headings'
 
 		tv.heading('address', text='Address')
-		tv.column('address', anchor='w', width=80)
+		tv.column('address', anchor='w', width=80, stretch=False)
 		
 		tv.heading('code', text='Code')
-		tv.column('code', anchor='w', width=80)
+		tv.column('code', anchor='w', width=80, stretch=False)
 		
 		tv.heading('instruction', text='Instruction')
 		tv.column('instruction', anchor='w', stretch=True)
 		
 
 		for line_num in self.memory.text_memory:
-			tv.insert('', 'end', line_num, values=('{:08x}'.format(line_num), '', self.memory[line_num]['line']))
-
+			tv.insert('', 'end', line_num, values=(
+				'{:08x}'.format(line_num),
+				'{:08x}'.format(self.memory[line_num]['code']),
+				self.memory[line_num]['line']
+			))
 		tv.selection_set(self.registers['pc'])
 
 		tv.pack(side="left", fill="both", expand=True)
@@ -87,7 +99,7 @@ class Gui():
 				value=self.memory[addr]
 			tv.insert('', 'end', addr, values=('{:08x}'.format(addr), '{:08x}'.format(value)))
 
-		tv.pack(side="right", fill="y", expand=True)
+		tv.pack(side="right", fill="y")
 		self.stack_segment = tv
 
 	def init_output_window(self):
@@ -125,6 +137,7 @@ class Gui():
 
 			self.stack_segment.item(addr, values=('{:08x}'.format(addr), '{:08x}'.format(value)))
 		self.stack_segment.selection_set(changed)
+
 	def update_text_segment(self):
 		if self.text_segment.exists(self.registers['pc']):
 			self.text_segment.selection_set(self.registers['pc'])

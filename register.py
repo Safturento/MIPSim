@@ -64,8 +64,8 @@ class Register:
 
 	def encode(self, key):
 		if key in REGISTER_NICKS:
-			return int(REGISTER_NICKS[key][1:],16)
-		return int(key[1:],16)
+			return int(REGISTER_NICKS[key][1:],10)
+		return int(key[1:],10)
 
 	def __setitem__(self, key, value):
 		if key in REGISTER_NICKS:
