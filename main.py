@@ -110,10 +110,7 @@ for i,line in enumerate(text_lines):
 	if line['inst'] in instructions.branch_instructions:
 		if line['params'][-1] in jumps:
 			target_loc = jumps[line['params'][-1]]
-			text_lines[i]['params'][-1] = target_loc - i
-			# Calculate 2's complement to display proper 2's complement of negative values
-			 #'{:08x}'.format((target_loc - i - 1) & 2**32-1)
-			# hex((target_loc - i - 1) & 2**32-1)
+			text_lines[i]['params'][-1] = target_loc - i - 1
 
 	# This line is pretty mess but is able to parse jump locations into
 	# hex for display without overwriting the actual jump value in memory

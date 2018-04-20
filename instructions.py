@@ -193,7 +193,7 @@ class Instructions:
 
 	# Branches
 	def branch(self, offset):
-		self.register['pc'] += (offset-1) * 4
+		self.register['pc'] += (offset) * 4
 
 	def _beq(self, source, target, offset, return_hex=False):
 		if return_hex:
