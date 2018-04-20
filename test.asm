@@ -1,4 +1,4 @@
-
+			move $0, $0
 
 			j skip
 jumpback:

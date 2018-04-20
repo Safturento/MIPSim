@@ -155,7 +155,7 @@ class Instructions:
 
 	def _syscall(self, return_hex=False):
 		if return_hex:
-			return 0
+			return int('{:32b}'.format(12),2)
 
 		service_number = int(self.register['$v0'])
 
@@ -168,27 +168,55 @@ class Instructions:
 
 	# Logical operators
 	def _and(self, dest, source, target, return_hex=False):
-		self.register[dest] = self.register[source] & self.register[target]
 		if return_hex:
-			return 0
+			return int('{:06b}{:05b}{:05b}{:05b}{:11b}'.format(
+				0,
+				self.register.encode(source),
+				self.register.encode(target),
+				self.register.encode(dest),
+				36
+				),2)
+
+		self.register[dest] = self.register[source] & self.register[target]
 
 
 	def _or(self, dest, source, target, return_hex=False):
-		self.register[dest] = self.register[source] | self.register[target]
 		if return_hex:
-			return 0
+			return int('{:06b}{:05b}{:05b}{:05b}{:11b}'.format(
+				0,
+				self.register.encode(source),
+				self.register.encode(target),
+				self.register.encode(dest),
+				37
+				),2)
+
+		self.register[dest] = self.register[source] | self.register[target]
 
 
 	def _xor(self, dest, source, target, return_hex=False):
-		self.register[dest] = self.register[source] ^ self.register[target]
 		if return_hex:
-			return 0
+			return int('{:06b}{:05b}{:05b}{:05b}{:11b}'.format(
+				0,
+				self.register.encode(source),
+				self.register.encode(target),
+				self.register.encode(dest),
+				38
+				),2)
+
+		self.register[dest] = self.register[source] ^ self.register[target]
 
 
 	def _nor(self, dest, source, target, return_hex=False):
-		self.register[dest] = ~ (self.register[source] | self.register[target])
 		if return_hex:
-			return 0
+			return int('{:06b}{:05b}{:05b}{:05b}{:11b}'.format(
+				0,
+				self.register.encode(source),
+				self.register.encode(target),
+				self.register.encode(dest),
+				39
+				),2)
+
+		self.register[dest] = ~ (self.register[source] | self.register[target])
 
 
 	# Branches

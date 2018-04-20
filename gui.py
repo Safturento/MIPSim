@@ -6,8 +6,11 @@ import threading
 
 from register import REGISTER_NICKS
 
-class Gui():
+class Gui(threading.Thread):
 	def __init__(self, registers, memory):
+		threading.Thread.__init__(self)
+		self.start()
+
 		self.root = Tk()
 		self.root.geometry("660x864")
 		self.registers = registers
@@ -27,12 +30,14 @@ class Gui():
 
 		self.win.pack(fill="both", expand=True)
 
+
 	def set_loop(self, loop_func, step):
-		# if step:
-		self.root.bind('<Return>', loop_func)
-		# else:
-		# 	while True:
-		# 		loop_func(self)
+		if step:
+			self.root.bind('<Return>', loop_func)
+		else:
+			def run(self):
+				while loop_func(): continue
+			self.root.bind('<Return>', run)
 
 	def init_register_section(self):		
 		# self.register_section = {}

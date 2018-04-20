@@ -2,6 +2,7 @@ import re
 import sys
 import os
 import string
+import time
 
 from register import Register
 from instructions import Instructions, twos_comp
@@ -112,10 +113,15 @@ for i,line in enumerate(text_lines):
 			target_loc = jumps[line['params'][-1]]
 			text_lines[i]['params'][-1] = target_loc - i - 1
 
-	# This line is pretty mess but is able to parse jump locations into
-	# hex for display without overwriting the actual jump value in memory
-	# while simply passing everything else as its normal value
-	line['line'] = line['inst'] + ' ' + ', '.join([twos_comp(x) if type(x) is int else x for x in (line['params'] or [])])
+	# We want to ensure that values are set to 2's complement for this so that
+	# we show the actual jump values correpsonding to memory locations
+	params = []
+	for item in line['params']:
+		if type(item) is int:
+			params.append(twos_comp(item))
+		else: params.append(item)
+
+	line['line'] = line['inst'] + ' ' + ', '.join(params)
 	text_lines[i]['code'] = instructions[line['inst']](return_hex=True, *line['params'])
 
 	# populate memory. It's important to remember that any value stored or accessed in memory
@@ -133,13 +139,16 @@ memory.set_text_section(end)
 # Start program counter loop to run through program
 if CONSOLE_OUTPUT:
 	while register['pc'] <= end:
-
 		line = memory[register['pc']]
-		print('{:08x}'.format(register['pc']), ">>", line['line'], input(), end='')
+
+		if STEP:
+			print('{:08x}'.format(register['pc']), ">>", line['line'], input(), end='')
+		
 		if line['params']:
 			instructions[line['inst']](*line['params'])
 		else:
 			instructions[line['inst']]()
+		
 		register['pc'] += 4
 
 	print("\nend of file. press enter to close")
@@ -159,6 +168,9 @@ else:
 				instructions[line['inst']]()
 			register['pc'] += 4
 			gui.update()
+			return True
+		else:
+			return False
 
 	gui.set_loop(loop, STEP)
 	gui.root.mainloop()
