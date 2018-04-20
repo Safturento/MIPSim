@@ -1,5 +1,4 @@
 #j swtest
-next:
 # random tests
 		li $t1, 1
 		sll $t1, $t1, 31
@@ -8,7 +7,6 @@ next:
 		mflo $a0
 		li $v0, 1
 		syscall
-		beq $t1, $t1, next
 
 		jal newline
 		

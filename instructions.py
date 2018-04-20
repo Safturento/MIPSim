@@ -18,8 +18,8 @@ class Instructions:
 			# "\\'": '\"',
 		}
 	def set_gui(self, gui):
-		self.gui = gu
-i
+		self.gui = gui
+		
 	# Arithmetic instructions
 	def _addi(self, dest, source, imm, return_hex=False):	
 		if return_hex:
