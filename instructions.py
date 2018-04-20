@@ -2,6 +2,11 @@ import re
 from syscall import service_map
 import string
 
+def twos_comp(x):
+	if x < 0:
+		x = x & (2**32-1) 
+	return '{:08x}'.format(x)
+
 class Instructions:
 	def __init__(self, register, memory):
 		self.register = register
@@ -19,18 +24,18 @@ class Instructions:
 		}
 	def set_gui(self, gui):
 		self.gui = gui
-		
+
 	# Arithmetic instructions
-	def _addi(self, dest, source, imm, return_hex=False):	
+	def _addi(self, target, source, imm, return_hex=False):	
 		if return_hex:
 			return int('{:06b}{:05b}{:05b}{:016b}'.format(
 				8,
-				self.register.encode(dest),
 				self.register.encode(source),
+				self.register.encode(target),
 				int(imm)
 				),2)
 
-		self.register[dest] = self.register[source] + int(imm)
+		self.register[target] = self.register[source] + int(imm)
 
 	def _add(self, dest, source, target, return_hex=False):
 		if return_hex:
@@ -188,8 +193,7 @@ class Instructions:
 
 	# Branches
 	def branch(self, offset):
-		# undo 2's complement to do the actual branch calculation
-		self.register['pc'] += (int(offset,16) - (2**32)) * 4
+		self.register['pc'] += (offset-1) * 4
 
 	def _beq(self, source, target, offset, return_hex=False):
 		if return_hex:
@@ -197,7 +201,7 @@ class Instructions:
 				4,
 				self.register.encode(source),
 				self.register.encode(target),
-				int(str(offset[-4::]),16)
+				int(twos_comp(offset)[-4::],16)
 				),2)
 
 		if self.register[source] == self.register[target]:
@@ -209,7 +213,7 @@ class Instructions:
 				5,
 				self.register.encode(source),
 				self.register.encode(target),
-				int(str(offset[-4::]),16)
+				int(twos_comp(offset)[-4::],16)
 				),2)
 
 		if self.register[source] != self.register[target]:
@@ -221,7 +225,7 @@ class Instructions:
 				1,
 				self.register.encode(source),
 				1,
-				int(str(offset[-4::]),16)
+				int(twos_comp(offset)[-4::],16)
 				),2)
 
 		if self.register[source] >= 0:
@@ -233,7 +237,7 @@ class Instructions:
 				7,
 				self.register.encode(source),
 				0,
-				int(str(offset[-4::]),16)
+				int(twos_comp(offset)[-4::],16)
 				),2)
 
 		if self.register[source] > 0:
@@ -245,7 +249,7 @@ class Instructions:
 				6,
 				self.register.encode(source),
 				0,
-				int(str(offset[-4::]),16)
+				int(twos_comp(offset)[-4::],16)
 				),2)
 
 		if self.register[source] <= 0:
@@ -257,7 +261,7 @@ class Instructions:
 				1,
 				self.register.encode(source),
 				0,
-				int(str(offset[-4::]),16)
+				int(twos_comp(offset)[-4::],16)
 				),2)
 
 		if self.register[source] < 0:
@@ -269,7 +273,7 @@ class Instructions:
 				1,
 				self.register.encode(source),
 				17,
-				int(str(offset[-4::]),16)
+				int(twos_comp(offset)[-4::],16)
 				),2)
 
 		self.register['$ra'] = self.register['pc']
@@ -282,7 +286,7 @@ class Instructions:
 				1,
 				self.register.encode(source),
 				16,
-				int(str(offset[-4::]),16)
+				int(twos_comp(offset)[-4::],16)
 				),2)
 
 		self.register['$ra'] = self.register['pc']
@@ -315,29 +319,46 @@ class Instructions:
 
 
 	def _sw(self, source, target, return_hex=False):
+		word_offset, source = re.match(r'(\d+)\((\$\w+)\)', target).groups()
 		if return_hex:
-			return 0
+			return int('{:06b}{:05b}{:05b}{:016b}'.format(
+				43,
+				self.register.encode(source),
+				self.register.encode(target),
+				int(word_offset)
+				),2)
 
-		word_offset, reg = re.match(r'(\d+)\((\$\w+)\)', target).groups()
 		# Offset is word offset, so we need to multiply by 4 to get actual mem address
-		loc = self.register[reg] + int(word_offset)
+		loc = self.register[source] + int(word_offset)
 		self.memory[loc] = self.register[source]
 
 
 	def _lw(self, dest, target, return_hex=False):
+		word_offset, source = re.match(r'(\d+)\((\$\w+)\)', target).groups()
 		if return_hex:
-			return 0
+			return int('{:06b}{:05b}{:05b}{:016b}'.format(
+				35,
+				self.register.encode(source),
+				self.register.encode(target),
+				int(word_offset)
+				),2)
 
-		word_offset, reg = re.match(r'(\d+)\((\$\w+)\)', target).groups()
 		# Offset is word offset, so we need to multiply by 4 to get actual mem address
-		loc = self.register[reg] + int(word_offset)
+		loc = self.register[source] + int(word_offset)
 		self.register[dest] = self.memory[loc]
 
+
+	def _nop(self, return_hex=False):
+		if return_hex:
+			return '{032b}'.format(0)
+		pass
+		
+	# Assembler Directives
+	
 	def _ascii(self, string):
 		# print(string)
 		pass
-
-	# Assembler Directives
+	
 	def _asciiz(self, string):
 		
 		self.register['$sp']
@@ -352,10 +373,6 @@ class Instructions:
 	def _text(self):
 		pass
 
-	def _nop(self, return_hex=False):
-		if return_hex:
-			return 0
-		pass
 
 	# Overloads self[key] to allow easy access to MIPS functions
 	def __getitem__(self, key):

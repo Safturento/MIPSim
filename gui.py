@@ -76,7 +76,10 @@ class Gui():
 				'{:08x}'.format(self.memory[line_num]['code']),
 				self.memory[line_num]['line']
 			))
-		tv.selection_set(self.registers['pc'])
+
+		# avoid crashing on empty program
+		if len(self.memory.text_memory) > 0:
+			tv.selection_set(self.registers['pc'])
 
 		tv.pack(side="left", fill="both", expand=True)
 		self.text_segment = tv
