@@ -1016,13 +1016,18 @@ body .markdown-body
 }
 </style><title>README</title></head><body><article class="markdown-body"><h1 id="mipsim"><a name="user-content-mipsim" href="#mipsim" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>MIPSim</h1>
 <p>MIPS simulator written in python3</p>
-<h1 id="installation"><a name="user-content-installation" href="#installation" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Installation</h1>
+<h1 id="installation-usage"><a name="user-content-installation-usage" href="#installation-usage" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Installation &amp; Usage</h1>
 <p>The only requirement is python3-tk if you wish to use the gui.<br />
 To install simply clone the repo, navigate to the project root and run<br />
-<code>python3 main.py &lt;optional-flags&gt; &lt;filename&gt;</code><br />
-optional flags are<br />
-<pre><code>-c : force cli interface instead of gui
--s : allows you to step through program line by line
+<pre><code>usage: main.py [-h] [-c] [-s] file_path
+
+positional arguments:
+  file_path      path to assembly file
+
+optional arguments:
+  -h, --help     show this help message and exit
+  -c, --console  force cli interface instead of gui
+  -s, --step     step through program line by line
 </code></pre></p>
 <h1 id="currently-supported-instructions"><a name="user-content-currently-supported-instructions" href="#currently-supported-instructions" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Currently supported instructions</h1>
 <p><pre><code>addi, add, sub, mult, mflo, mfhi, mul
@@ -1040,7 +1045,7 @@ move - addu with 0
 </code></pre>
 
 <h1 id="useful-mips-reference-links"><a name="user-content-useful-mips-reference-links" href="#useful-mips-reference-links" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Useful MIPS reference links</h1>
-<p><a href="http://www.mrc.uidaho.edu/mrc/people/jff/digital/MIPSir.html">Mips Instruction Reference</a><br />
-<a href="http://www.math-cs.gordon.edu/courses/cps311/handouts-2017/MIPS%20ISA.pdf">MIPS ISA</a><br />
-<a href="https://courses.missouristate.edu/KenVollmar/mars/Help/SyscallHelp.html">MIPS syscall functions</a><br />
-<a href="http://students.cs.tamu.edu/tanzir/csce350/reference/assembler_dir.html">MIPS directives</a></p></article></body></html>
+<p><a href="http://www.mrc.uidaho.edu/mrc/people/jff/digital/MIPSir.html">Mips Instruction Reference</a></p>
+<p><a href="http://www.math-cs.gordon.edu/courses/cps311/handouts-2017/MIPS%20ISA.pdf">MIPS ISA</a></p>
+<p><a href="https://courses.missouristate.edu/KenVollmar/mars/Help/SyscallHelp.html">MIPS syscall functions</a></p>
+<p><a href="http://students.cs.tamu.edu/tanzir/csce350/reference/assembler_dir.html">MIPS directives</a></p></article></body></html>

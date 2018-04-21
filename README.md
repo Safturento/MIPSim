@@ -1,15 +1,19 @@
 # MIPSim
 MIPS simulator written in python3
 
-# Installation
+# Installation & Usage
 The only requirement is python3-tk if you wish to use the gui.
 To install simply clone the repo, navigate to the project root and run
-``` python3 main.py <optional-flags> <filename> ```
-optional flags are
-```
--c : force cli interface instead of gui
--s : allows you to step through program line by line
-<filename> : in this case is test.asm
+``` 
+usage: main.py [-h] [-c] [-s] file_path
+
+positional arguments:
+  file_path      path to assembly file
+
+optional arguments:
+  -h, --help     show this help message and exit
+  -c, --console  force cli interface instead of gui
+  -s, --step     step through program line by line
 ```
 
 # Currently supported instructions
@@ -31,6 +35,9 @@ move - addu with 0
 ```
 # Useful MIPS reference links
 [Mips Instruction Reference](http://www.mrc.uidaho.edu/mrc/people/jff/digital/MIPSir.html)
+
 [MIPS ISA](http://www.math-cs.gordon.edu/courses/cps311/handouts-2017/MIPS%20ISA.pdf)
+
 [MIPS syscall functions](https://courses.missouristate.edu/KenVollmar/mars/Help/SyscallHelp.html)
+
 [MIPS directives](http://students.cs.tamu.edu/tanzir/csce350/reference/assembler_dir.html)
