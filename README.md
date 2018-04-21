@@ -9,6 +9,7 @@ optional flags are
 ```
 -c : force cli interface instead of gui
 -s : allows you to step through program line by line
+<filename> : in this case is test.asm
 ```
 
 # Currently supported instructions
