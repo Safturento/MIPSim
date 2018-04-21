@@ -2,10 +2,7 @@ import re
 from syscall import service_map
 import string
 
-def twos_comp(x):
-	if x < 0:
-		x = x & (2**32-1) 
-	return '{:08x}'.format(x)
+from helpers import twos_comp, unescape
 
 class Instructions:
 	def __init__(self, register, memory):
@@ -17,11 +14,7 @@ class Instructions:
 		# This allows for a mapping that automatically removes all whitespace
 		# characters from a string using string.translate(whitespace_trans)
 		self.whitespace = {ord(c):None for c in string.whitespace}
-		self.escaped = {
-			'\\n': '\n'
-			# '\\"': '\'',
-			# "\\'": '\"',
-		}
+	
 	def set_gui(self, gui):
 		self.gui = gui
 
@@ -32,10 +25,10 @@ class Instructions:
 				8,
 				self.register.encode(source),
 				self.register.encode(target),
-				int(imm)
-				),2)
+				int(twos_comp(unescape(imm))[-4::],16)
+				), 2)
 
-		self.register[target] = self.register[source] + int(imm)
+		self.register[target] = self.register[source] + int(unescape(imm))
 
 	def _add(self, dest, source, target, return_hex=False):
 		if return_hex:
@@ -45,7 +38,7 @@ class Instructions:
 				self.register.encode(source),
 				self.register.encode(target),
 				32
-				),2)
+				), 2)
 
 		self.register[dest] = self.register[source] + self.register[target]
 
@@ -57,7 +50,7 @@ class Instructions:
 				self.register.encode(source),
 				self.register.encode(target),
 				34
-				),2)
+				), 2)
 
 		self.register[dest] = self.register[source] - self.register[target]
 
@@ -69,7 +62,7 @@ class Instructions:
 				self.register.encode(source),
 				self.register.encode(target),
 				24
-				),2)
+				), 2)
 
 		product = '{:064b}'.format((self.register[source] * self.register[target]))
 		self.register['lo'] = int(product[32:],2)
@@ -81,7 +74,7 @@ class Instructions:
 				0,
 				self.register.encode(dest),
 				18
-				),2)
+				), 2)
 
 		self.register[dest] = self.register['lo']
 
@@ -95,7 +88,7 @@ class Instructions:
 				0,
 				self.register.encode(dest),
 				16
-				),2)
+				), 2)
 
 		self.register[dest] = self.register['hi']
 
@@ -108,7 +101,7 @@ class Instructions:
 				self.register.encode(dest),
 				shift,
 				0
-				),2)
+				), 2)
 
 		self.register[dest] = self.register[source] << shift
 
@@ -120,7 +113,7 @@ class Instructions:
 				self.register.encode(dest),
 				shift,
 				2
-				),2)
+				), 2)
 
 		self.register[dest] = self.register[source] >> shift
 
@@ -129,22 +122,7 @@ class Instructions:
 		if return_hex:
 			return 0
 
-		# self.register[dest] = int(imm)
-		if type(imm) is str:
-			# I haven't found a better way to do this,
-			# re-escaping keys is a weird problem..
-			imm = imm.replace('\\"', '\'')
-			imm = imm.replace("\\'", '\"')
-			imm = imm.replace('\\a', '\a')
-			imm = imm.replace('\\b', '\b')
-			imm = imm.replace('\\f', '\f')
-			imm = imm.replace('\\n', '\n')
-			imm = imm.replace('\\r', '\r')
-			imm = imm.replace('\\t', '\t')
-			imm = imm.replace('\\v', '\v')
-
-			imm = ord(imm)
-		self.register[dest] = int(imm)
+		self.register[dest] = int(unescape(imm))
 
 	# Misc instructions
 	def _move(self, dest, source, return_hex=False):
@@ -155,7 +133,7 @@ class Instructions:
 
 	def _syscall(self, return_hex=False):
 		if return_hex:
-			return int('{:32b}'.format(12),2)
+			return int('{:32b}'.format(12), 2)
 
 		service_number = int(self.register['$v0'])
 
@@ -164,7 +142,7 @@ class Instructions:
 			if hasattr(self, 'gui'):
 				self.gui.print(output)
 			else:
-				print('\n', output)
+				print(output, end='')
 
 	# Logical operators
 	def _and(self, dest, source, target, return_hex=False):
@@ -175,7 +153,7 @@ class Instructions:
 				self.register.encode(target),
 				self.register.encode(dest),
 				36
-				),2)
+				), 2)
 
 		self.register[dest] = self.register[source] & self.register[target]
 
@@ -188,7 +166,7 @@ class Instructions:
 				self.register.encode(target),
 				self.register.encode(dest),
 				37
-				),2)
+				), 2)
 
 		self.register[dest] = self.register[source] | self.register[target]
 
@@ -201,7 +179,7 @@ class Instructions:
 				self.register.encode(target),
 				self.register.encode(dest),
 				38
-				),2)
+				), 2)
 
 		self.register[dest] = self.register[source] ^ self.register[target]
 
@@ -214,7 +192,7 @@ class Instructions:
 				self.register.encode(target),
 				self.register.encode(dest),
 				39
-				),2)
+				), 2)
 
 		self.register[dest] = ~ (self.register[source] | self.register[target])
 
@@ -230,7 +208,7 @@ class Instructions:
 				self.register.encode(source),
 				self.register.encode(target),
 				int(twos_comp(offset)[-4::],16)
-				),2)
+				), 2)
 
 		if self.register[source] == self.register[target]:
 			self.branch(offset)
@@ -242,7 +220,7 @@ class Instructions:
 				self.register.encode(source),
 				self.register.encode(target),
 				int(twos_comp(offset)[-4::],16)
-				),2)
+				), 2)
 
 		if self.register[source] != self.register[target]:
 			self.branch(offset)
@@ -254,7 +232,7 @@ class Instructions:
 				self.register.encode(source),
 				1,
 				int(twos_comp(offset)[-4::],16)
-				),2)
+				), 2)
 
 		if self.register[source] >= 0:
 			self.branch(offset)
@@ -266,7 +244,7 @@ class Instructions:
 				self.register.encode(source),
 				0,
 				int(twos_comp(offset)[-4::],16)
-				),2)
+				), 2)
 
 		if self.register[source] > 0:
 			self.branch(offset)
@@ -278,7 +256,7 @@ class Instructions:
 				self.register.encode(source),
 				0,
 				int(twos_comp(offset)[-4::],16)
-				),2)
+				), 2)
 
 		if self.register[source] <= 0:
 			self.branch(offset)
@@ -290,7 +268,7 @@ class Instructions:
 				self.register.encode(source),
 				0,
 				int(twos_comp(offset)[-4::],16)
-				),2)
+				), 2)
 
 		if self.register[source] < 0:
 			self.branch(offset)
@@ -302,7 +280,7 @@ class Instructions:
 				self.register.encode(source),
 				17,
 				int(twos_comp(offset)[-4::],16)
-				),2)
+				), 2)
 
 		self.register['$ra'] = self.register['pc']
 
@@ -315,7 +293,7 @@ class Instructions:
 				self.register.encode(source),
 				16,
 				int(twos_comp(offset)[-4::],16)
-				),2)
+				), 2)
 
 		self.register['$ra'] = self.register['pc']
 		self.blez(source, offset)
@@ -325,7 +303,7 @@ class Instructions:
 		if return_hex:
 			return int('{:06b}{:026b}'.format(
 				2, target
-				),2)
+				), 2)
 		self.register['pc'] = target - 4
 
 
@@ -333,7 +311,7 @@ class Instructions:
 		if return_hex:
 			return int('{:06b}{:026b}'.format(
 				3, target
-				),2)
+				), 2)
 
 		self.register['$ra'] = self.register['pc']
 
@@ -346,34 +324,34 @@ class Instructions:
 		self.register['pc'] = self.register[source]
 
 
-	def _sw(self, source, target, return_hex=False):
-		word_offset, source = re.match(r'(\d+)\((\$\w+)\)', target).groups()
+	def _sw(self, target, source, return_hex=False):
+		word_offset, source = re.match(r'(\d+)\((\$\w+)\)', source).groups()
 		if return_hex:
 			return int('{:06b}{:05b}{:05b}{:016b}'.format(
 				43,
 				self.register.encode(source),
 				self.register.encode(target),
 				int(word_offset)
-				),2)
+				), 2)
 
 		# Offset is word offset, so we need to multiply by 4 to get actual mem address
 		loc = self.register[source] + int(word_offset)
-		self.memory[loc] = self.register[source]
+		self.memory[loc] = self.register[target]
 
 
-	def _lw(self, dest, target, return_hex=False):
-		word_offset, source = re.match(r'(\d+)\((\$\w+)\)', target).groups()
+	def _lw(self, target, source, return_hex=False):
+		word_offset, source = re.match(r'(\d+)\((\$\w+)\)', source).groups()
 		if return_hex:
 			return int('{:06b}{:05b}{:05b}{:016b}'.format(
 				35,
 				self.register.encode(source),
 				self.register.encode(target),
 				int(word_offset)
-				),2)
+				), 2)
 
 		# Offset is word offset, so we need to multiply by 4 to get actual mem address
 		loc = self.register[source] + int(word_offset)
-		self.register[dest] = self.memory[loc]
+		self.register[target] = self.memory[loc]
 
 
 	def _nop(self, return_hex=False):

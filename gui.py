@@ -5,6 +5,9 @@ from threading import Thread
 import threading
 
 from register import REGISTER_NICKS
+from helpers import unescape
+
+STACK_LIMIT = 128
 
 class Gui(threading.Thread):
 	def __init__(self, registers, memory):
@@ -12,7 +15,7 @@ class Gui(threading.Thread):
 		self.start()
 
 		self.root = Tk()
-		self.root.geometry("660x864")
+		self.root.geometry("700x864")
 		self.registers = registers
 		self.memory = memory
 		self.root.title("Registers")
@@ -36,7 +39,7 @@ class Gui(threading.Thread):
 			self.root.bind('<Return>', loop_func)
 		else:
 			def run(self):
-				while loop_func(): continue
+				while loop_func(self): continue
 			self.root.bind('<Return>', run)
 
 	def init_register_section(self):		
@@ -100,12 +103,12 @@ class Gui(threading.Thread):
 		tv.heading('value', text='Value')
 		tv.column('value', anchor='w', width=80)
 		
-		limit = 128
-		for addr in range(self.registers['$sp'], self.registers['$sp'] + limit*4, 4):
-			value = 0
-			if addr in self.memory:
-				value=self.memory[addr]
-			tv.insert('', 'end', addr, values=('{:08x}'.format(addr), '{:08x}'.format(value)))
+		for i in range(STACK_LIMIT):
+			addr = self.registers['$sp'] + (i-8) * 4
+			value = self.memory[addr]
+			tv.insert('', 'end', str(i), values=('{:08x}'.format(addr), '{:08x}'.format(value)))
+
+		tv.selection_set(8)
 
 		tv.pack(side="right", fill="y")
 		self.stack_segment = tv
@@ -129,22 +132,20 @@ class Gui(threading.Thread):
 			if int(str(self.register_display.item(reg_num)['values'][1]),16) != reg_val:
 				changed.append(reg_num)
 			self.register_display.item(reg_num ,values=(self.registers.get_nick(reg_num), '{:08x}'.format(reg_val)))
+
 		self.register_display.selection_set(changed)
 
 	def update_stack_segment(self):
 		changed = []
-		# to keep things simple we'll just print the next 128 bytes like MARS does
-		limit = 128
-		for addr in range(self.registers['$sp'], self.registers['$sp'] + limit*4, 4):
-			value = 0
-			if addr in self.memory:
-				value=self.memory[addr]
 
-			if int(str(self.stack_segment.item(addr)['values'][1]),16) != value:
-				changed.append(addr)
+		for i in range(STACK_LIMIT):
+			addr = self.registers['$sp'] + (i-8) * 4
+			value = self.memory[addr]
+			# if int(str(self.stack_segment.item(str(i))['values'][1]),16) != value:
+				# changed.append(addr)
+			self.stack_segment.item(str(i), values=('{:08x}'.format(addr), '{:08x}'.format(value)))
 
-			self.stack_segment.item(addr, values=('{:08x}'.format(addr), '{:08x}'.format(value)))
-		self.stack_segment.selection_set(changed)
+		self.stack_segment.selection_set(8)
 
 	def update_text_segment(self):
 		if self.text_segment.exists(self.registers['pc']):

@@ -3,6 +3,8 @@ class Memory:
 		self.memory = {}
 
 	def __getitem__(self, key):
+		if not key in self.memory:
+			self.memory[key] = 0
 		return self.memory[key]
 
 	def __setitem__(self, key, value):
