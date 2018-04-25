@@ -1,5 +1,5 @@
 # MIPSim
-MIPS simulator written in python3 with gui displaying 
+MIPS simulator written in python3 with gui displaying registers, memory values throughout execution, and console for syscall outputs.
 
 # Installation & Usage
 The only requirement is python3-tk if you wish to use the gui.
