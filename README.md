@@ -1,5 +1,5 @@
 # MIPSim
-MIPS simulator written in python3
+MIPS simulator written in python3 with gui displaying 
 
 # Installation & Usage
 The only requirement is python3-tk if you wish to use the gui.
@@ -15,6 +15,10 @@ optional arguments:
   -c, --console  force cli interface instead of gui
   -s, --step     step through program line by line
 ```
+
+To run through the file simply press enter once its opened, if using the ```-s``` flag press enter for each step (or hold enter to fast forward)
+
+**Warning:** using the ```-s``` and ```-c``` flag at the same time will place code inline with output and may be messy to read. It is just suggested to use these together.
 
 # Currently supported instructions
 ```
@@ -33,6 +37,7 @@ li - addi with 0
 nop - do nothing
 move - addu with 0
 ```
+
 # Useful MIPS reference links
 [Mips Instruction Reference](http://www.mrc.uidaho.edu/mrc/people/jff/digital/MIPSir.html)
 

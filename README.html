@@ -1015,7 +1015,7 @@ body .markdown-body
   }
 }
 </style><title>README</title></head><body><article class="markdown-body"><h1 id="mipsim"><a name="user-content-mipsim" href="#mipsim" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>MIPSim</h1>
-<p>MIPS simulator written in python3</p>
+<p>MIPS simulator written in python3 with gui displaying </p>
 <h1 id="installation-usage"><a name="user-content-installation-usage" href="#installation-usage" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Installation &amp; Usage</h1>
 <p>The only requirement is python3-tk if you wish to use the gui.<br />
 To install simply clone the repo, navigate to the project root and run<br />
@@ -1029,6 +1029,8 @@ optional arguments:
   -c, --console  force cli interface instead of gui
   -s, --step     step through program line by line
 </code></pre></p>
+<p>To run through the file simply press enter once its opened, if using the <code>-s</code> flag press enter for each step (or hold enter to fast forward)</p>
+<p><strong>Warning:</strong> using the <code>-s</code> and <code>-c</code> flag at the same time will place code inline with output and may be messy to read. It is just suggested to use these together.</p>
 <h1 id="currently-supported-instructions"><a name="user-content-currently-supported-instructions" href="#currently-supported-instructions" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Currently supported instructions</h1>
 <p><pre><code>addi, add, sub, mult, mflo, mfhi, mul
 sw, lw
